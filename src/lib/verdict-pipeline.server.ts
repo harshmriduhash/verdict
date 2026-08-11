@@ -231,7 +231,7 @@ export async function runVerdictPipeline(
       status: "complete",
       verdict,
       verdict_summary: orchestratorSummary,
-      scores: { ...scores, stats },
+      scores: { ...scores, stats: { ...stats } } as unknown as never,
       duration_seconds: Number((timeline.durationMs / 1000).toFixed(2)),
       width: timeline.width,
       height: timeline.height,
