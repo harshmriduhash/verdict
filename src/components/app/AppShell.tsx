@@ -22,10 +22,14 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Link to="/dashboard" activeProps={{ className: "text-foreground" }}>
               Reviews
             </Link>
+            <Link to="/upload" activeProps={{ className: "text-foreground" }}>
+              New review
+            </Link>
             <Link to="/brand" activeProps={{ className: "text-foreground" }}>
               Brand kit
             </Link>
           </nav>
+
           <div className="ml-auto flex items-center gap-3">
             {workspace ? (
               <span className="hidden text-xs text-muted-foreground sm:inline">
