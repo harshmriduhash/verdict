@@ -13,6 +13,8 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as BrandRouteImport } from './routes/brand'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as UploadRouteImport } from './routes/upload'
+import { Route as ReviewProjectIdRouteImport } from './routes/review.$projectId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -34,18 +36,32 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UploadRoute = UploadRouteImport.update({
+  id: '/upload',
+  path: '/upload',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReviewProjectIdRoute = ReviewProjectIdRouteImport.update({
+  id: '/review/$projectId',
+  path: '/review/$projectId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/brand': typeof BrandRoute
   '/dashboard': typeof DashboardRoute
+  '/upload': typeof UploadRoute
+  '/review/$projectId': typeof ReviewProjectIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/brand': typeof BrandRoute
   '/dashboard': typeof DashboardRoute
+  '/upload': typeof UploadRoute
+  '/review/$projectId': typeof ReviewProjectIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,13 +69,23 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/brand': typeof BrandRoute
   '/dashboard': typeof DashboardRoute
+  '/upload': typeof UploadRoute
+  '/review/$projectId': typeof ReviewProjectIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/brand' | '/dashboard'
+  fullPaths:
+    '/' | '/auth' | '/brand' | '/dashboard' | '/upload' | '/review/$projectId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/brand' | '/dashboard'
-  id: '__root__' | '/' | '/auth' | '/brand' | '/dashboard'
+  to: '/' | '/auth' | '/brand' | '/dashboard' | '/upload' | '/review/$projectId'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth'
+    | '/brand'
+    | '/dashboard'
+    | '/upload'
+    | '/review/$projectId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -67,6 +93,8 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   BrandRoute: typeof BrandRoute
   DashboardRoute: typeof DashboardRoute
+  UploadRoute: typeof UploadRoute
+  ReviewProjectIdRoute: typeof ReviewProjectIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -99,6 +127,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/upload': {
+      id: '/upload'
+      path: '/upload'
+      fullPath: '/upload'
+      preLoaderRoute: typeof UploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/review/$projectId': {
+      id: '/review/$projectId'
+      path: '/review/$projectId'
+      fullPath: '/review/$projectId'
+      preLoaderRoute: typeof ReviewProjectIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -107,6 +149,8 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   BrandRoute: BrandRoute,
   DashboardRoute: DashboardRoute,
+  UploadRoute: UploadRoute,
+  ReviewProjectIdRoute: ReviewProjectIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
