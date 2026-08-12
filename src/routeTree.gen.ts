@@ -14,6 +14,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as BrandRouteImport } from './routes/brand'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as UploadRouteImport } from './routes/upload'
+import { Route as ReviewProjectIdRouteImport } from './routes/review.$projectId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -40,6 +41,11 @@ const UploadRoute = UploadRouteImport.update({
   path: '/upload',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ReviewProjectIdRoute = ReviewProjectIdRouteImport.update({
+  id: '/review/$projectId',
+  path: '/review/$projectId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -47,6 +53,7 @@ export interface FileRoutesByFullPath {
   '/brand': typeof BrandRoute
   '/dashboard': typeof DashboardRoute
   '/upload': typeof UploadRoute
+  '/review/$projectId': typeof ReviewProjectIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -54,6 +61,7 @@ export interface FileRoutesByTo {
   '/brand': typeof BrandRoute
   '/dashboard': typeof DashboardRoute
   '/upload': typeof UploadRoute
+  '/review/$projectId': typeof ReviewProjectIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -62,13 +70,22 @@ export interface FileRoutesById {
   '/brand': typeof BrandRoute
   '/dashboard': typeof DashboardRoute
   '/upload': typeof UploadRoute
+  '/review/$projectId': typeof ReviewProjectIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/brand' | '/dashboard' | '/upload'
+  fullPaths:
+    '/' | '/auth' | '/brand' | '/dashboard' | '/upload' | '/review/$projectId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/brand' | '/dashboard' | '/upload'
-  id: '__root__' | '/' | '/auth' | '/brand' | '/dashboard' | '/upload'
+  to: '/' | '/auth' | '/brand' | '/dashboard' | '/upload' | '/review/$projectId'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth'
+    | '/brand'
+    | '/dashboard'
+    | '/upload'
+    | '/review/$projectId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -77,6 +94,7 @@ export interface RootRouteChildren {
   BrandRoute: typeof BrandRoute
   DashboardRoute: typeof DashboardRoute
   UploadRoute: typeof UploadRoute
+  ReviewProjectIdRoute: typeof ReviewProjectIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -116,6 +134,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UploadRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/review/$projectId': {
+      id: '/review/$projectId'
+      path: '/review/$projectId'
+      fullPath: '/review/$projectId'
+      preLoaderRoute: typeof ReviewProjectIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -125,17 +150,8 @@ const rootRouteChildren: RootRouteChildren = {
   BrandRoute: BrandRoute,
   DashboardRoute: DashboardRoute,
   UploadRoute: UploadRoute,
+  ReviewProjectIdRoute: ReviewProjectIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
