@@ -3,7 +3,9 @@ import { useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Check, Wrench } from "lucide-react";
+import { Check, Wrench, Download, Undo2 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { downloadReviewPdf } from "@/lib/report-pdf";
 import { AppShell } from "@/components/app/AppShell";
 import { Button } from "@/components/ui/button";
 import { VerdictBadge } from "@/components/verdict/VerdictBadge";
@@ -14,7 +16,7 @@ import {
 } from "@/components/verdict/ReviewPlayer";
 import { supabase } from "@/integrations/supabase/client";
 import { signedVideoUrl, useActiveWorkspace, canEdit } from "@/lib/workspace";
-import { overrideFinding } from "@/lib/verdict.functions";
+import { overrideFinding, reopenFindingFn } from "@/lib/verdict.functions";
 import {
   AGENT_LABEL,
   formatTimestamp,
@@ -47,6 +49,11 @@ function ReviewPage() {
   const queryClient = useQueryClient();
   const { workspace } = useActiveWorkspace();
   const override = useServerFn(overrideFinding);
+  const reopen = useServerFn(reopenFindingFn);
+  const [pending, setPending] = useState<{ id: string; decision: "approved" | "fix_confirmed" } | null>(null);
+  const [note, setNote] = useState("");
+  const [savingId, setSavingId] = useState<string | null>(null);
+  const [pdfBusy, setPdfBusy] = useState(false);
   const playerRef = useRef<ReviewPlayerHandle>(null);
   const [currentMs, setCurrentMs] = useState(0);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -112,22 +119,66 @@ function ReviewPage() {
     playerRef.current?.seekTo(ms);
   };
 
-  const decide = async (
-    findingId: string,
-    decision: "approved" | "fix_confirmed",
-  ) => {
+  const decide = async (findingId: string, decision: "approved" | "fix_confirmed") => {
+    setSavingId(findingId);
     try {
-      await override({ data: { findingId, decision } });
+      const res = await override({ data: { findingId, decision, note: note.trim() || undefined } });
+      setPending(null);
+      setNote("");
       await queryClient.invalidateQueries({ queryKey: ["review", projectId] });
+      const learned = res?.overrideCount
+        ? res.activeAfter
+          ? ` Taste memory now applies this (${res.overrideCount}× reinforced).`
+          : ` Taste memory: ${res.overrideCount}/3 before it changes future reviews.`
+        : "";
       toast.success(
-        decision === "approved"
-          ? "Marked intentional — taste memory updated."
-          : "Marked as a real fix.",
+        (decision === "approved" ? "Marked intentional." : "Marked as a real fix.") + learned,
+        { action: { label: "Undo", onClick: () => undo(findingId) } },
       );
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Couldn't record that.");
+    } finally {
+      setSavingId(null);
     }
   };
+
+  const undo = async (findingId: string) => {
+    setSavingId(findingId);
+    try {
+      await reopen({ data: { findingId } });
+      await queryClient.invalidateQueries({ queryKey: ["review", projectId] });
+      toast.success("Override undone — finding reopened.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Couldn't undo that.");
+    } finally {
+      setSavingId(null);
+    }
+  };
+
+  const exportPdf = async () => {
+    setPdfBusy(true);
+    try {
+      await downloadReviewPdf({
+        title: project.title,
+        brandKit: project.brand_kits?.name ?? null,
+        durationMs,
+        width: project.width,
+        height: project.height,
+        verdict: project.verdict,
+        summary: project.verdict_summary,
+        degradedReason: project.degraded ? project.degraded_reason ?? "A specialist was unavailable." : null,
+        scores,
+        findings: findings as never,
+      });
+    } catch {
+      toast.error("Couldn't build the PDF. Try again.");
+    } finally {
+      setPdfBusy(false);
+    }
+  };
+
+  const openCount = findings.filter((f) => f.status === "open").length;
+  const resolvedCount = findings.length - openCount;
 
   return (
     <AppShell>
@@ -142,11 +193,21 @@ function ReviewPage() {
               {formatTimestamp(durationMs)} · {project.width}×{project.height}
             </p>
           </div>
-          <VerdictBadge
-            verdict={project.verdict as VerdictType | null}
-            processing={project.status === "reviewing"}
-            size="lg"
-          />
+          <div className="flex items-center gap-3">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={exportPdf}
+              disabled={pdfBusy || project.status === "reviewing"}
+            >
+              <Download className="size-3.5" /> {pdfBusy ? "Building…" : "PDF report"}
+            </Button>
+            <VerdictBadge
+              verdict={project.verdict as VerdictType | null}
+              processing={project.status === "reviewing"}
+              size="lg"
+            />
+          </div>
         </div>
 
         {project.verdict_summary ? (
@@ -196,6 +257,11 @@ function ReviewPage() {
           </div>
 
           <div className="space-y-4">
+            {findings.length > 0 ? (
+              <p className="text-xs text-muted-foreground">
+                {resolvedCount} of {findings.length} findings reviewed · {openCount} open
+              </p>
+            ) : null}
             <div className="flex flex-wrap gap-2">
               {(["all", "technical", "pacing", "brand"] as const).map((k) => (
                 <button
@@ -263,28 +329,86 @@ function ReviewPage() {
                       </p>
                     ) : null}
                     {editable && f.status === "open" ? (
-                      <div className="mt-3 flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          onClick={() => decide(f.id, "approved")}
-                        >
-                          <Check className="size-3.5" /> Intentional
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => decide(f.id, "fix_confirmed")}
-                        >
-                          <Wrench className="size-3.5" /> Real fix
-                        </Button>
-                      </div>
+                      pending?.id === f.id ? (
+                        <div className="mt-3 space-y-2">
+                          <Textarea
+                            rows={2}
+                            maxLength={500}
+                            value={note}
+                            onChange={(e) => setNote(e.target.value)}
+                            placeholder={
+                              pending.decision === "approved"
+                                ? "Why is this intentional? (optional — teaches the panel)"
+                                : "What should be fixed? (optional)"
+                            }
+                          />
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              disabled={savingId === f.id}
+                              onClick={() => decide(f.id, pending.decision)}
+                            >
+                              {savingId === f.id
+                                ? "Saving…"
+                                : pending.decision === "approved"
+                                  ? "Confirm intentional"
+                                  : "Confirm real fix"}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => {
+                                setPending(null);
+                                setNote("");
+                              }}
+                            >
+                              Cancel
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="mt-3 flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            onClick={() => {
+                              setNote("");
+                              setPending({ id: f.id, decision: "approved" });
+                            }}
+                          >
+                            <Check className="size-3.5" /> Intentional
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => {
+                              setNote("");
+                              setPending({ id: f.id, decision: "fix_confirmed" });
+                            }}
+                          >
+                            <Wrench className="size-3.5" /> Real fix
+                          </Button>
+                        </div>
+                      )
                     ) : f.status !== "open" ? (
-                      <p className="mt-3 text-xs text-muted-foreground">
-                        {f.status === "approved"
-                          ? "Overridden as intentional — taste memory learned this."
-                          : "Confirmed as a real fix."}
-                      </p>
+                      <div className="mt-3 space-y-1 text-xs text-muted-foreground">
+                        <p>
+                          {f.status === "approved"
+                            ? "Overridden as intentional — taste memory learned this."
+                            : "Confirmed as a real fix."}
+                        </p>
+                        {f.override_note ? <p className="italic">"{f.override_note}"</p> : null}
+                        {editable ? (
+                          <button
+                            type="button"
+                            disabled={savingId === f.id}
+                            onClick={() => undo(f.id)}
+                            className="inline-flex items-center gap-1 underline-offset-4 hover:text-foreground hover:underline"
+                          >
+                            <Undo2 className="size-3" /> Undo
+                          </button>
+                        ) : null}
+                      </div>
                     ) : null}
                   </li>
                 ))}
