@@ -378,3 +378,58 @@ export async function recordOverride(
     activeAfter: (preference?.count ?? 0) >= MIN_REINFORCEMENTS,
   };
 }
+
+/** Undo an override: reopen the finding and weaken the learned preference by one. */
+export async function reopenFinding(
+  supabase: Client,
+  userId: string,
+  input: { findingId: string },
+) {
+  const { data: finding, error } = await supabase
+    .from("findings")
+    .select("*, projects(brand_kit_id)")
+    .eq("id", input.findingId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!finding) throw new Error("Finding not found.");
+  if (finding.status === "open") return { ok: true };
+
+  const prevDirection = finding.status === "approved" ? "approve" : "enforce";
+  const { error: upErr } = await supabase
+    .from("findings")
+    .update({ status: "open", resolved_by: null, override_note: null, resolved_at: null })
+    .eq("id", input.findingId);
+  if (upErr) throw new Error(upErr.message);
+
+  const brandKitId = finding.projects?.brand_kit_id;
+  if (brandKitId) {
+    const { data: pref } = await supabase
+      .from("taste_preferences")
+      .select("*")
+      .eq("brand_kit_id", brandKitId)
+      .eq("signal_key", signalKey(finding.agent, finding.title))
+      .eq("direction", prevDirection)
+      .maybeSingle();
+    if (pref) {
+      const count = pref.override_count - 1;
+      if (count <= 0) {
+        await supabase.from("taste_preferences").delete().eq("id", pref.id);
+      } else {
+        await supabase
+          .from("taste_preferences")
+          .update({ override_count: count, confidence_score: Math.min(0.98, 0.2 + count * 0.16) })
+          .eq("id", pref.id);
+      }
+    }
+  }
+
+  await supabase.from("audit_logs").insert({
+    workspace_id: finding.workspace_id,
+    actor_user_id: userId,
+    action: "finding.reopened",
+    target_type: "finding",
+    target_id: input.findingId,
+    metadata: { agent: finding.agent, title: finding.title },
+  });
+  return { ok: true };
+}
