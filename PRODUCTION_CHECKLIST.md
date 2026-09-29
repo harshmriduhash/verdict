@@ -43,3 +43,8 @@ Operational gate before Verdict serves paying customers. Beta may ship with `[ ]
 - [ ] Privacy policy and terms pages
 - [ ] Data processing / retention statement for uploaded footage
 - [ ] Cookie and analytics disclosure
+
+## Release: progress, reports, override feedback
+- [x] `findings.override_note` + `resolved_at` columns migrated
+- [x] Undo writes an audit log (`finding.reopened`)
+- [x] PDF generated client-side — no footage or data leaves the browser

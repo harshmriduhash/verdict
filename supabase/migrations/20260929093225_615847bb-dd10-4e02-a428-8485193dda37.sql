@@ -1,0 +1,1 @@
+ALTER TABLE public.findings ADD COLUMN IF NOT EXISTS override_note text, ADD COLUMN IF NOT EXISTS resolved_at timestamptz;
