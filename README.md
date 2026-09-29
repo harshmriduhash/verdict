@@ -85,7 +85,8 @@ never the intelligence, it was the transcoding, and that now happens for free on
 | **Orchestrator** | Weighted synthesis (technical 40 % / pacing 35 % / brand 25 %) → Ship, Fix, or Escalate + written rationale |
 | **Findings ruler** | Three colour-coded agent lanes over the timeline; click a tick to seek that exact frame |
 | **Frame-accurate player** | `requestVideoFrameCallback` where supported, graceful fallback everywhere else |
-| **Taste memory** | Overrides reinforce a keyed preference; 3 hits down-weight the signal permanently |
+| **Taste memory** | Overrides (with optional editor reason) reinforce a keyed preference; 3 hits down-weight the signal; Undo decrements it |
+| **PDF report** | Client-side jsPDF export of the full review for stakeholders |
 | **Graceful degradation** | Any agent can fail; the verdict still ships with a partial-verdict banner |
 | **Multi-tenant + RBAC** | Workspaces, owner/admin/editor/viewer, enforced in Postgres via RLS |
 | **Beta onboarding** | A three-step guided loop: brand kit → first review → first override |
@@ -215,7 +216,9 @@ auth.users ─1:1─ profiles
 | Deterministic technical QA + pacing statistics | ✅ |
 | Pacing, Brand and Orchestrator agents | ✅ |
 | Ship / Fix / Escalate scoring and rationale | ✅ |
-| Upload → review flow with live progress | ✅ |
+| Upload → review flow with step tracker, real byte-level upload %, retry on failure | ✅ |
+| One-click PDF review report (verdict, scores, every cited finding, editor notes) | ✅ |
+| Override feedback: optional reason notes, taste-memory progress toasts, undo (reverses the learned preference) | ✅ |
 | Frame-accurate player + findings ruler + agent lanes | ✅ |
 | Override controls and taste-memory reinforcement | ✅ |
 | Editable brand kit (tone, colours, fonts, pacing targets) | ✅ |
@@ -228,7 +231,7 @@ auth.users ─1:1─ profiles
 - Team invites and workspace-management UI (schema is ready)
 - Speech transcription lane for dialogue-aware pacing
 - Reference-video comparison ("make it feel like these three")
-- Shareable review links and PDF export
+- Shareable review links
 - Retry/resume for interrupted reviews, automated footage retention purge
 
 ### 🔭 What's next

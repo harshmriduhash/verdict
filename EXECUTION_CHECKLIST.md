@@ -46,4 +46,8 @@ A step-by-step trace of the system, useful for debugging and for onboarding new 
 - [ ] Upload a clip with a 1 s black hole and clipped audio → expect technical criticals
 - [ ] Click a finding timestamp → player seeks to that frame
 - [ ] Override the same finding type on three reviews → it drops to `info` on the fourth
+- [ ] Add a reason to an override → it appears on the finding and in the PDF
+- [ ] Undo an override → finding reopens, taste count drops by one
+- [ ] Download PDF report → verdict, scores and all findings present
+- [ ] Upload a large file → upload step shows MB progress; kill network → failed step + Retry
 - [ ] Sign in as a `viewer` → no upload, no override controls

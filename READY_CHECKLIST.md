@@ -4,11 +4,12 @@
 | --- | --- | --- |
 | Auth | Sign up / in / out, session persists, protected routes gated | ✅ |
 | Tenancy | Workspace + owner membership + default brand kit on signup | ✅ |
-| Upload | Type + size guards, decode errors are actionable | ✅ |
+| Upload | Type + size guards, step tracker, live upload %, retry | ✅ |
+| Reports | PDF export of verdict, scores and findings | ✅ |
 | Pipeline | Deterministic layer always returns a verdict | ✅ |
 | Agents | Pacing + Brand + Orchestrator, fail-soft | ✅ |
 | Citations | Every finding carries a timestamp; ruler seeks to it | ✅ |
-| Taste memory | Overrides persist and down-weight after 3 reinforcements | ✅ |
+| Taste memory | Overrides with reasons persist, undoable, down-weight after 3 | ✅ |
 | Security | RLS + GRANTs + private bucket + signed URLs + CSRF | ✅ |
 | Roles | owner / admin / editor / viewer enforced in SQL | ✅ |
 | SEO | Unique title, description and OG tags per route | ✅ |

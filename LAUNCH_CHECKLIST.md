@@ -10,6 +10,9 @@ Status legend: `[x]` shipped · `[~]` partial · `[ ]` pending
 - [x] Upload → decompose → panel → verdict flow (`/upload`)
 - [x] Review page: frame-accurate player, findings ruler, per-agent lanes
 - [x] Override controls (Intentional / Real fix) feeding taste memory
+- [x] Override reason notes + undo (reverses taste reinforcement)
+- [x] Step-by-step upload progress with live upload % and retry
+- [x] PDF review report download
 - [x] Editable brand kit (tone, colours, fonts, pacing targets)
 - [x] Beta onboarding checklist on the dashboard
 - [ ] Team invites UI (schema supports it; UI pending)

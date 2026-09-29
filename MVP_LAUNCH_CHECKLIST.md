@@ -9,7 +9,8 @@ Scope: 10–50 invited editors and creative leads.
 - [x] Frame-accurate citations on every finding
 - [x] Ship / Fix / Escalate call with a written rationale
 - [x] Brand kit the panel actually reads
-- [x] Overrides that train taste memory
+- [x] Overrides that train taste memory (with reasons + undo)
+- [x] Visible multi-step upload progress with retry
 - [x] Never a blank screen: deterministic verdict when models fail
 - [x] Role-based permissions enforced in the database, not the UI
 
@@ -17,7 +18,8 @@ Scope: 10–50 invited editors and creative leads.
 - [ ] Team invites and shared workspaces UI
 - [ ] Transcript lane and dialogue-aware pacing
 - [ ] Comparison against reference videos you upload
-- [ ] Export a review as PDF / share link
+- [x] Export a review as PDF
+- [ ] Share link for a review
 - [ ] Slack and Frame.io notifications
 
 ## Beta guardrails
