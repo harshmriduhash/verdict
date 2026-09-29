@@ -109,7 +109,9 @@ export type Database = {
           evidence: string | null
           explanation: string
           id: string
+          override_note: string | null
           project_id: string
+          resolved_at: string | null
           resolved_by: string | null
           severity: Database["public"]["Enums"]["severity_type"]
           status: Database["public"]["Enums"]["finding_status"]
@@ -126,7 +128,9 @@ export type Database = {
           evidence?: string | null
           explanation: string
           id?: string
+          override_note?: string | null
           project_id: string
+          resolved_at?: string | null
           resolved_by?: string | null
           severity?: Database["public"]["Enums"]["severity_type"]
           status?: Database["public"]["Enums"]["finding_status"]
@@ -143,7 +147,9 @@ export type Database = {
           evidence?: string | null
           explanation?: string
           id?: string
+          override_note?: string | null
           project_id?: string
+          resolved_at?: string | null
           resolved_by?: string | null
           severity?: Database["public"]["Enums"]["severity_type"]
           status?: Database["public"]["Enums"]["finding_status"]
