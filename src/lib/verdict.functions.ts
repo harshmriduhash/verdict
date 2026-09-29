@@ -69,10 +69,21 @@ export const overrideFinding = createServerFn({ method: "POST" })
       .object({
         findingId: z.string().uuid(),
         decision: z.enum(["approved", "fix_confirmed"]),
+        note: z.string().max(500).optional(),
       })
       .parse(data),
   )
   .handler(async ({ data, context }) => {
     const { recordOverride } = await import("./verdict-pipeline.server");
     return recordOverride(context.supabase, context.userId, data);
+  });
+
+export const reopenFindingFn = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) =>
+    z.object({ findingId: z.string().uuid() }).parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    const { reopenFinding } = await import("./verdict-pipeline.server");
+    return reopenFinding(context.supabase, context.userId, data);
   });

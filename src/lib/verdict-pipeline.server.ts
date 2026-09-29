@@ -293,7 +293,7 @@ function fallbackSummary(
 export async function recordOverride(
   supabase: Client,
   userId: string,
-  input: { findingId: string; decision: "approved" | "fix_confirmed" },
+  input: { findingId: string; decision: "approved" | "fix_confirmed"; note?: string },
 ) {
   const { data: finding, error } = await supabase
     .from("findings")
@@ -302,11 +302,18 @@ export async function recordOverride(
     .maybeSingle();
   if (error) throw new Error(error.message);
   if (!finding) throw new Error("Finding not found.");
+  const note = input.note?.trim() || null;
 
-  await supabase
+  const { error: upErr } = await supabase
     .from("findings")
-    .update({ status: input.decision, resolved_by: userId })
+    .update({
+      status: input.decision,
+      resolved_by: userId,
+      override_note: note,
+      resolved_at: new Date().toISOString(),
+    })
     .eq("id", input.findingId);
+  if (upErr) throw new Error(upErr.message);
 
   const brandKitId = finding.projects?.brand_kit_id;
   const workspaceId = finding.workspace_id;
@@ -315,10 +322,11 @@ export async function recordOverride(
   if (brandKitId) {
     const key = signalKey(finding.agent, finding.title);
     const direction = input.decision === "approved" ? "approve" : "enforce";
-    const text =
+    const base =
       input.decision === "approved"
         ? `Approved despite ${finding.agent} flag: "${finding.title}" is acceptable for this brand.`
         : `Confirmed as a real problem: ${finding.agent} flag "${finding.title}" should always be enforced for this brand.`;
+    const text = note ? `${base} Editor's reason: ${note}` : base;
 
     const { data: existing } = await supabase
       .from("taste_preferences")
