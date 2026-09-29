@@ -53,12 +53,12 @@ async function uploadWithProgress(path: string, file: File, onProgress: (loaded:
   const { data } = await supabase.auth.getSession();
   const token = data.session?.access_token;
   if (!token) throw new Error("Your session expired. Sign in again.");
-  const url = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/videos/${path}`;
+  const url = `${import.meta.env['VITE_SUPABASE_URL']}/storage/v1/object/videos/${path}`;
   await new Promise<void>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open("POST", url);
     xhr.setRequestHeader("Authorization", `Bearer ${token}`);
-    xhr.setRequestHeader("apikey", import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY);
+    xhr.setRequestHeader("apikey", import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY']);
     xhr.setRequestHeader("Content-Type", file.type || "video/mp4");
     xhr.setRequestHeader("x-upsert", "false");
     xhr.upload.onprogress = (e) => e.lengthComputable && onProgress(e.loaded);

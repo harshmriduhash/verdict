@@ -293,7 +293,7 @@ function fallbackSummary(
 export async function recordOverride(
   supabase: Client,
   userId: string,
-  input: { findingId: string; decision: "approved" | "fix_confirmed"; note?: string },
+  input: { findingId: string; decision: "approved" | "fix_confirmed"; note?: string | undefined },
 ) {
   const { data: finding, error } = await supabase
     .from("findings")
