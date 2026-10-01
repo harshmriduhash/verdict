@@ -91,6 +91,20 @@ function UploadPage() {
   const [startedAt, setStartedAt] = useState(0);
 
   const busy = stage !== null;
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (new URLSearchParams(window.location.search).get("sample") !== "1") return;
+    fetch("/samples/verdict-sample.mp4")
+      .then((r) => r.blob())
+      .then((b) => {
+        setFile(new File([b], "verdict-sample.mp4", { type: "video/mp4" }));
+        setTitle("Sample export — Verdict demo");
+        setNote("Sample video: has a black open, colour bars and a flat tone — expect a FIX verdict.");
+        toast.success("Sample video loaded. Press the review button to get your first verdict.");
+      })
+      .catch(() => toast.error("Couldn't load the sample video."));
+  }, []);
   const editable = canEdit(workspace?.role);
 
   if (!loading && !user) {
