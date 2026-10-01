@@ -160,7 +160,7 @@ export function TasteLog({ kitId, editable }: { kitId: string; editable: boolean
                 <div className="min-w-0 flex-1">
                   <p className="text-sm">{p.preference_text}</p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    <span className="mono-label">{p.agent}</span> · {p.direction === "approved" ? "you keep approving this" : "you keep confirming this"} · {p.override_count} override{p.override_count === 1 ? "" : "s"} · {Math.round(p.confidence_score * 100)}% confidence · {active ? "applied" : `${3 - p.override_count} more to apply`}
+                    <span className="mono-label">{p.agent}</span> · {p.direction === "approve" ? "you keep approving this" : "you keep confirming this"} · {p.override_count} override{p.override_count === 1 ? "" : "s"} · {Math.round(p.confidence_score * 100)}% confidence · {active ? "applied" : `${3 - p.override_count} more to apply`}
                   </p>
                   <div className="mt-2 h-1 w-40 rounded-full bg-secondary">
                     <div className="h-1 rounded-full bg-primary" style={{ width: `${Math.min(100, p.confidence_score * 100)}%` }} />
