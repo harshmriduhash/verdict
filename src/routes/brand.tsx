@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
+import { ReferenceGallery, TasteLog } from "@/components/app/BrandMemory";
 import { useActiveWorkspace, useBrandKits, canEdit } from "@/lib/workspace";
 
 export const Route = createFileRoute("/brand")({
@@ -195,6 +196,12 @@ function BrandPage() {
             )}
           </form>
         )}
+        {kit && workspace ? (
+          <>
+            <ReferenceGallery workspaceId={workspace.id} kitId={kit.id} editable={editable} />
+            <TasteLog kitId={kit.id} editable={editable} />
+          </>
+        ) : null}
       </div>
     </AppShell>
   );

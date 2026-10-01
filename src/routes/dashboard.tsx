@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { AppShell } from "@/components/app/AppShell";
 import { OnboardingCard } from "@/components/app/OnboardingCard";
+import { WelcomeWizard } from "@/components/app/WelcomeWizard";
 import { VerdictBadge } from "@/components/verdict/VerdictBadge";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -48,6 +49,26 @@ function Dashboard() {
     },
   });
 
+  const { data: stats } = useQuery({
+    queryKey: ["dash-stats", workspace?.id],
+    enabled: !!workspace?.id,
+    queryFn: async () => {
+      const weekAgo = new Date(Date.now() - 7 * 864e5).toISOString();
+      const [week, taste, open] = await Promise.all([
+        supabase.from("projects").select("verdict").eq("workspace_id", workspace!.id).gte("created_at", weekAgo),
+        supabase.from("taste_preferences").select("id", { count: "exact", head: true }).eq("workspace_id", workspace!.id),
+        supabase.from("findings").select("id", { count: "exact", head: true }).eq("workspace_id", workspace!.id).eq("status", "open"),
+      ]);
+      const rows = week.data ?? [];
+      return {
+        week: rows.filter((r) => r.verdict).length,
+        ship: rows.filter((r) => r.verdict === "ship").length,
+        taste: taste.count ?? 0,
+        open: open.count ?? 0,
+      };
+    },
+  });
+
   if (!loading && !user) {
     return (
       <AppShell>
@@ -79,6 +100,23 @@ function Dashboard() {
           </Button>
         </div>
 
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            ["Verdicts this week", stats?.week ?? 0, "across all exports"],
+            ["Shipped this week", stats?.ship ?? 0, "cleared on first pass"],
+            ["Open findings", stats?.open ?? 0, "waiting on a decision"],
+            ["Taste memory", stats?.taste ?? 0, "learned preferences"],
+          ].map(([label, value, hint]) => (
+            <div key={label as string} className="rounded-xl border border-border p-5">
+              <p className="mono-label">{label}</p>
+              <p className="mt-2 text-3xl font-semibold tabular-nums">{value}</p>
+              <p className="mt-1 text-xs text-muted-foreground">{hint}</p>
+            </div>
+          ))}
+        </div>
+
+        {!isLoading && projects.length === 0 ? <WelcomeWizard workspaceId={workspace?.id} /> : null}
+
         <OnboardingCard
           state={{
             brandKitReady: kits.some((k) => !!k.tone_of_voice),
@@ -94,9 +132,14 @@ function Dashboard() {
             <p className="text-sm text-muted-foreground">
               No reviews yet. Upload an export to get your first verdict.
             </p>
-            <Button asChild className="mt-5" variant="secondary">
-              <Link to="/upload">Upload an export</Link>
-            </Button>
+            <div className="mt-5 flex justify-center gap-2">
+              <Button asChild variant="secondary">
+                <Link to="/upload">Upload an export</Link>
+              </Button>
+              <Button asChild>
+                <a href="/upload?sample=1">Try the sample video</a>
+              </Button>
+            </div>
           </div>
         ) : (
           <ul className="divide-y divide-border rounded-xl border border-border">

@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useSyncExternalStore } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -45,13 +46,25 @@ export function getActiveWorkspaceId(list: WorkspaceRecord[]): string | null {
   return list[0]!.id;
 }
 
+const listeners = new Set<() => void>();
 export function setActiveWorkspaceId(id: string) {
   if (typeof window !== "undefined") window.localStorage.setItem(ACTIVE_KEY, id);
+  listeners.forEach((l) => l());
+}
+function subscribe(l: () => void) {
+  listeners.add(l);
+  return () => listeners.delete(l);
 }
 
 export function useActiveWorkspace() {
   const { data: workspaces = [], isLoading } = useWorkspaces();
-  const activeId = getActiveWorkspaceId(workspaces);
+  const stored = useSyncExternalStore(
+    subscribe,
+    () => window.localStorage.getItem(ACTIVE_KEY),
+    () => null,
+  );
+  const activeId =
+    stored && workspaces.some((w) => w.id === stored) ? stored : (workspaces[0]?.id ?? null);
   const workspace = workspaces.find((w) => w.id === activeId) ?? null;
   return { workspace, workspaces, isLoading };
 }
