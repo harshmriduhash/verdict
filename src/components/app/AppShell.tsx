@@ -2,12 +2,12 @@ import { Link, useRouter } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { Gavel, LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { useActiveWorkspace } from "@/lib/workspace";
+import { useActiveWorkspace, setActiveWorkspaceId } from "@/lib/workspace";
 import { Button } from "@/components/ui/button";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { user, signOut } = useAuth();
-  const { workspace } = useActiveWorkspace();
+  const { workspace, workspaces } = useActiveWorkspace();
   const router = useRouter();
 
   return (
@@ -32,9 +32,18 @@ export function AppShell({ children }: { children: ReactNode }) {
 
           <div className="ml-auto flex items-center gap-3">
             {workspace ? (
-              <span className="hidden text-xs text-muted-foreground sm:inline">
-                {workspace.name} · {workspace.role}
-              </span>
+              <select
+                aria-label="Switch workspace"
+                value={workspace.id}
+                onChange={(e) => setActiveWorkspaceId(e.target.value)}
+                className="hidden h-8 max-w-[220px] rounded-md border border-border bg-secondary px-2 text-xs text-foreground sm:block"
+              >
+                {workspaces.map((w) => (
+                  <option key={w.id} value={w.id}>
+                    {w.name} · {w.role}
+                  </option>
+                ))}
+              </select>
             ) : null}
             {user ? (
               <Button
