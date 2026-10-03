@@ -11,7 +11,7 @@ import { useBrandKits } from "@/lib/workspace";
 
 const KEY = "verdict.wizardDone";
 
-export function WelcomeWizard({ workspaceId }: { workspaceId?: string }) {
+export function WelcomeWizard({ workspaceId }: { workspaceId?: string | undefined }) {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
   const [tone, setTone] = useState("");

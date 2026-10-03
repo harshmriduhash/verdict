@@ -287,3 +287,10 @@ src/
 **Verdict** — because the last review shouldn't be the first thing you skip.
 
 </div>
+
+### Shipped in this release
+- Landing: animated verdict-report hero, pricing teaser, beta testimonials, full footer
+- Dashboard: stat cards (verdicts this week, shipped, open findings, taste-memory size) + workspace switcher
+- Brand kit: reference-video gallery and human-readable taste-memory log with "Forget"
+- Onboarding: 3-step first-run wizard + bundled sample video for an instant first verdict
+- Auth: Google sign-in, email-verification gate with resend, forgot / reset password pages

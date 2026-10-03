@@ -39,8 +39,8 @@ export function ReferenceGallery({ workspaceId, kitId, editable }: { workspaceId
 
   const add = async (file?: File) => {
     if (!file) return;
-    if (!file.type.startsWith("video/")) return toast.error("Choose a video file.");
-    if (file.size > 200 * 1024 * 1024) return toast.error("Reference clips are capped at 200 MB.");
+    if (!file.type.startsWith("video/")) { toast.error("Choose a video file."); return; }
+    if (file.size > 200 * 1024 * 1024) { toast.error("Reference clips are capped at 200 MB."); return; }
     setBusy(true);
     try {
       const duration = await probe(file);
@@ -68,7 +68,7 @@ export function ReferenceGallery({ workspaceId, kitId, editable }: { workspaceId
   const remove = async (id: string, path: string) => {
     await supabase.storage.from("videos").remove([path]);
     const { error } = await supabase.from("reference_videos").delete().eq("id", id);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     qc.invalidateQueries({ queryKey: key });
   };
 
@@ -136,7 +136,7 @@ export function TasteLog({ kitId, editable }: { kitId: string; editable: boolean
 
   const forget = async (id: string) => {
     const { error } = await supabase.from("taste_preferences").delete().eq("id", id);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success("Forgotten. The panel will flag this again.");
     qc.invalidateQueries({ queryKey: key });
   };
