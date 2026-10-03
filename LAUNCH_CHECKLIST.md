@@ -59,3 +59,9 @@ Status legend: `[x]` shipped · `[~]` partial · `[ ]` pending
 3. Run one 30 s and one 3 min export end to end; confirm verdict < 60 s.
 4. Watch the first 50 findings for false positives; override them to seed taste memory.
 5. Publish, then monitor AI Gateway usage and storage growth weekly.
+
+- [x] Google sign-in, email verification gate, password reset
+- [x] First-run wizard + sample video
+- [x] Dashboard stats + workspace switcher
+- [x] Reference videos + taste-memory log
+- [x] Landing hero, pricing, testimonials, footer

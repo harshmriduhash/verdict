@@ -31,3 +31,9 @@ Scope: 10–50 invited editors and creative leads.
 1. Every beta user gets a 15-minute onboarding call.
 2. Log every false positive as an override — that is the training signal.
 3. Weekly: review override counts per signal, tune deterministic thresholds.
+
+- [x] Google sign-in, email verification gate, password reset
+- [x] First-run wizard + sample video
+- [x] Dashboard stats + workspace switcher
+- [x] Reference videos + taste-memory log
+- [x] Landing hero, pricing, testimonials, footer

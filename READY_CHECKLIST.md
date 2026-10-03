@@ -19,3 +19,9 @@
 | Retention | Automated purge of source footage | ⏳ |
 
 **Go/no-go:** ready for invited beta. Not yet ready for self-serve GA until the ⏳ rows close.
+
+- [x] Google sign-in, email verification gate, password reset
+- [x] First-run wizard + sample video
+- [x] Dashboard stats + workspace switcher
+- [x] Reference videos + taste-memory log
+- [x] Landing hero, pricing, testimonials, footer
