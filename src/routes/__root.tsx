@@ -120,6 +120,30 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
+  // After a new deploy, an open tab may request old file names that no longer
+  // exist. Reload once to pick up the fresh version instead of a blank screen.
+  useEffect(() => {
+    const KEY = "verdict.chunkReload";
+    const recover = (e: Event) => {
+      const msg = String((e as PromiseRejectionEvent).reason?.message ?? (e as ErrorEvent).message ?? "");
+      if (e.type !== "vite:preloadError" && !/dynamically imported module|Importing a module script failed/i.test(msg)) return;
+      const last = Number(sessionStorage.getItem(KEY) ?? 0);
+      if (Date.now() - last < 10_000) return;
+      sessionStorage.setItem(KEY, String(Date.now()));
+      e.preventDefault();
+      window.location.reload();
+    };
+    window.addEventListener("vite:preloadError", recover);
+    window.addEventListener("unhandledrejection", recover);
+    window.addEventListener("error", recover);
+    return () => {
+      window.removeEventListener("vite:preloadError", recover);
+      window.removeEventListener("unhandledrejection", recover);
+      window.removeEventListener("error", recover);
+    };
+  }, []);
+
+
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
